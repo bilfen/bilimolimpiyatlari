@@ -291,6 +291,7 @@ export default function Home() {
   const [picked, setPicked] = useState<string | null>(null);
   const [notice, setNotice] = useState("Hoş geldin! Yol üç adımdan oluşuyor: öğren, iz sür, sınavda göster. Her adım bir sonrakini açar.");
   const [traceDone, setTraceDone] = useState(0);
+  const [celebration, setCelebration] = useState<null | "course" | "camp">(null);
   const hasHydrated = useRef(false);
 
   useEffect(() => {
@@ -316,6 +317,12 @@ export default function Home() {
   const campUnlocked = progress.completedChapterIds.includes("sinav-provasi");
   const atolyeUnlocked = traceDone >= TRACE_STEP_COUNT;
 
+  useEffect(() => {
+    if (!celebration) return;
+    const timer = window.setTimeout(() => setCelebration(null), 7200);
+    return () => window.clearTimeout(timer);
+  }, [celebration]);
+
   function scrollToSection(id: string, lockedMessage?: string) {
     if (lockedMessage) setNotice(lockedMessage);
     document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
@@ -339,7 +346,12 @@ export default function Home() {
       if (!wasCompleted) {
         setProgress((current) => ({ ...current, completedChapterIds: [...current.completedChapterIds, activeChapter.id] }));
         const next = CHAPTERS[activeIndex + 1];
-        setNotice(next ? `Bölüm ${activeChapter.no} tamam! Bölüm ${next.no} açıldı: ${next.title}.` : "Tüm bölümler tamam! Gerçek İSBO sorularına geçmeye hazırsın.");
+        if (next) {
+          setNotice(`Bölüm ${activeChapter.no} tamam! Bölüm ${next.no} açıldı: ${next.title}.`);
+        } else {
+          setNotice("Tüm bölümler tamam! İz sürme kampı açıldı.");
+          setCelebration("course");
+        }
       }
     } else {
       setNotice("Olmadı — sorun değil. Açıklamayı oku, öğretmen gibi sana adımı adımı anlatıyor; sonra yeniden dene.");
@@ -446,14 +458,14 @@ export default function Home() {
         <section className="journey-strip" aria-label="Üç adımlı öğrenme rotası">
           <span className="eyebrow eyebrow--ink"><Compass size={14} /> rota: üç adım, sırayla ilerle</span>
           <ol className="journey-steps">
-            <li className={`${isCourseDone ? "is-done" : "is-active"}`}>
+            <li className={`${isCourseDone ? `is-done ${celebration === "course" ? "is-just-done" : ""}` : "is-active"}`}>
               <button type="button" onClick={() => scrollToSection("bolumler")}>
                 <span className="journey-step__no">{isCourseDone ? <Check size={13} /> : "1"}</span>
                 <span className="journey-step__copy"><b>Öğrenme yolu</b><small>6 bölümle C'yi sıfırdan öğren</small></span>
                 <span className="journey-step__state">{completedCount} / {CHAPTERS.length}</span>
               </button>
             </li>
-            <li className={`${!campUnlocked ? "is-locked" : traceDone >= TRACE_STEP_COUNT ? "is-done" : "is-active"}`}>
+            <li className={`${!campUnlocked ? "is-locked" : `${traceDone >= TRACE_STEP_COUNT ? "is-done" : "is-active"} ${celebration === "camp" ? "is-just-done" : ""}`}`}>
               <button
                 type="button"
                 disabled={!campUnlocked}
@@ -478,6 +490,26 @@ export default function Home() {
               </button>
             </li>
           </ol>
+          {celebration && (
+            <div className="journey-celebration" role="status" aria-live="polite">
+              <div className="journey-confetti" aria-hidden="true">
+                {Array.from({ length: 26 }, (_, index) => (
+                  <i key={index} style={{ ["--i" as string]: index } as React.CSSProperties} />
+                ))}
+              </div>
+              {celebration === "course" ? (
+                <>
+                  <strong>1. adım tamam — tebrikler! 🎉</strong>
+                  <span>6 bölümü bitirip C'nin beş aracını topladın. İz sürme kampı artık açık: 35 görevle kod izlemeyi pekiştir.</span>
+                </>
+              ) : (
+                <>
+                  <strong>2. adım tamam — muhteşem! 🏆</strong>
+                  <span>35 görevin hepsini izledin ve çözdün. Soru Atölyesi kapıları açıldı: gerçek İSBO sorularıyla prova zamanı.</span>
+                </>
+              )}
+            </div>
+          )}
         </section>
 
         <section className="atlas-ribbon" aria-label="İlerleme">
@@ -645,6 +677,7 @@ export default function Home() {
               onRouteCompleted={() => {
                 setTraceDone(TRACE_STEP_COUNT);
                 setNotice("35 görevi tamamladın! Soru Atölyesi açıldı — gerçek İSBO soruları seni bekliyor.");
+                setCelebration("camp");
               }}
             />
           ) : (

@@ -616,7 +616,7 @@ button:focus-visible,a:focus-visible { outline:3px solid #ec775b; outline-offset
 @media (max-width:720px) { .camp-head { flex-direction:column; } }
 
 /* --- Üç adımlı rota şeridi --- */
-.journey-strip { width:min(1380px,calc(100% - 2rem)); margin:0 auto 1rem; display:grid; gap:.7rem; }
+.journey-strip { position:relative; width:min(1380px,calc(100% - 2rem)); margin:0 auto 1rem; display:grid; gap:.7rem; }
 .journey-steps { display:grid; grid-template-columns:repeat(3,1fr); gap:.7rem; margin:0; padding:0; list-style:none; }
 .journey-steps li { border-radius:1rem; }
 .journey-steps button { display:grid; grid-template-columns:auto minmax(0,1fr) auto; align-items:center; gap:.7rem; width:100%; padding:.8rem .95rem; border:1px solid rgba(23,63,95,.12); border-radius:1rem; background:#fffdf8; cursor:pointer; text-align:left; transition:transform .15s ease, box-shadow .15s ease; }
@@ -633,6 +633,21 @@ button:focus-visible,a:focus-visible { outline:3px solid #ec775b; outline-offset
 .journey-steps li.is-locked button { opacity:.55; }
 .journey-steps li.is-locked .journey-step__no { background:#8ba3b0; }
 @media (max-width:860px) { .journey-steps { grid-template-columns:1fr; } }
+
+/* --- Adım kutlaması: konfeti + teşekkür kartı --- */
+.journey-celebration { position:relative; overflow:hidden; margin-top:.35rem; padding:1.05rem 1.35rem; border-radius:1rem; border:1px solid #ead486; background:#fff8d7; color:#173f5f; box-shadow:0 14px 30px rgba(23,63,95,.14); animation:journey-pop .28s cubic-bezier(.23,1,.32,1) both; }
+.journey-celebration strong { display:block; font-family:"DM Serif Display",Georgia,serif; font-weight:400; font-size:1.24rem; line-height:1.15; }
+.journey-celebration span { display:block; margin-top:.32rem; color:#59747c; font-size:.8rem; line-height:1.55; }
+.journey-confetti { position:absolute; inset:0; pointer-events:none; }
+.journey-confetti i { position:absolute; top:46%; left:50%; width:6px; height:13px; border-radius:2px; background:hsl(calc(var(--i) * 43deg),70%,55%); transform:rotate(calc(var(--i) * 31deg)); animation:journey-confetti 1.25s cubic-bezier(.23,1,.32,1) both; animation-delay:calc(var(--i) * 16ms); }
+.journey-confetti i:nth-child(3n) { height:8px; border-radius:50%; }
+.journey-confetti i:nth-child(4n) { background:#173f5f; }
+.journey-confetti i:nth-child(5n) { background:#e4c95f; }
+@keyframes journey-pop { from { opacity:0; transform:scale(.96); } to { opacity:1; transform:scale(1); } }
+@keyframes journey-confetti { to { opacity:0; transform:translate(calc((var(--i) - 13) * 15px),calc(-80px - (var(--i) % 5) * 11px)) rotate(calc(var(--i) * 93deg)); } }
+.journey-steps li.is-just-done button { animation:journey-step-pulse .9s cubic-bezier(.23,1,.32,1); }
+@keyframes journey-step-pulse { 0% { transform:scale(.97); box-shadow:0 0 0 0 rgba(66,165,143,.4); } 45% { transform:scale(1.02); box-shadow:0 0 0 9px rgba(66,165,143,0); } 100% { transform:scale(1); } }
+@media (prefers-reduced-motion:reduce) { .journey-celebration,.journey-confetti i,.journey-steps li.is-just-done button { animation:none; } }
 
 /* --- Soru Atölyesi bölümü --- */
 .atolye-section { width:min(1380px,calc(100% - 2rem)); margin:0 auto 3rem; display:flex; flex-direction:column; gap:1.2rem; }
